@@ -60,3 +60,73 @@ const states: State[] = [
 - 타입스크립트를 어떻게 설정하느냐에 따라 프로젝트에서 사용하는 타입스크립트의 특성이 달라질 수 있다는 것을 알게 되었다.
 
 ---
+
+## 아이템3. 코드 생성과 타입이 관계없음을 이해하기
+
+### 읽은 내용
+
+> **타입스크립트는 컴파일러로써 두가지 역할을 한다.**
+1. 최신 타입스크립트/자바스크립트를 브라우저에서 구동되도록 구버전 JS로 트랜스파일 한다.
+2. 코드의 타입 오류를 체크한다.
+
+<br />
+
+> **타입스크립트는 타입 오류가 있는 코드도 컴파일이 가능하다.**  
+
+Rectangle은 타입으로서 존재하기 때문에 런타임 시점에서는 지워진다. 즉 값으로는 사용될 수 없다.
+
+```ts
+interface Square {
+  width: number;
+}
+
+interface Rectangle extends Square {
+  height: number;
+}
+
+type Shape = Square | Rectangle;
+
+function calculateArea(shape: Shape) {
+  if (shape instanceof Rectangle) {
+    return shape.width * shape.height;
+  } else {
+    return shape.width * shape.width;
+  }
+}
+```
+
+위 문제를 해결하기 위해서는 태그 된 유니온 기법을 사용한다.
+```ts
+interface Square {
+  kind: 'square';
+  width: number;
+}
+interface Rectangle {
+  kind: 'rectangle';
+  width: number;
+  height: number;
+}
+
+type Shape = Sqaure | Rectangle;
+
+function calculateArea(shape: Shape) {
+  if (shape.kind === 'rectangle') {
+    return shape.width * shape.height;
+  } else {
+    return shape.width * shape.width;
+  }
+}
+```
+<br />
+
+> **타입 연산은 런타임에 영향을 주지 않는다.**
+
+타입단언(as)은 타입의 연산이고, 런타임 동작에 아무런 영향을 주지 않는다.  
+값을 정제하기 위해서는 런타임에 타입을 체크해야하고 자바스크립트 연산을 통해 변환을 수행해야 한다.  
+
+
+### 느낀점 
+타입스크립트는 자바스크립트의 런타임에서 있을수 있는 오류를 사전에 방지하는 것이 핵심 목적이다.  
+그리고 객체간 타입을 정의하는 것에 있어서 그 관계를 알고 명시적으로 작성해야겠다.
+
+
