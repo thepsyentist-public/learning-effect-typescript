@@ -442,3 +442,45 @@ const tupleLike: ArrayLike<string> = {
 
 타입스크립트에서는 readonly를 사용하지 않더라도, JS는 암묵적으로 매개변수를 변경하지 않는것을 권장한다.  
 하지만 이러한 방법은 항상 명확하지 않기 때문에 readonly를 명시적으로 선언하는 것이 컴파일러와 코드를 읽는 사람에게 좋은 방법이다.  
+
+---
+
+## 아이템18. 매핑된 타입을 사용하여 값을 동기화하기
+
+### 읽은 내용
+
+매핑된 타입은 한 객체가 또 다른 객체와 정확히 같은 속성을 가지게 할 때 이상적이다.  
+매핑된 타입을 사용해 타입스크립트가 코드에 제약을 강제하도록 한다.  
+인터페이스에 새로운 속성을 추가할 때, 선택을 강제 하도록 매핑된 타입을 고려해야 한다.  
+
+```ts
+interface ScatterProps {
+  xs: number[];
+  ys: number[];
+
+  xRange: [number, number];
+  yRange: [number, number];
+  color: string;
+
+  onClick: (x: number, y: number, index: number) => void;
+}
+
+const REQUIRES_UPDATE: { [k in keyof ScatterProps]: boolean } = {
+  xs: true,
+  ys: true,
+  xRange: true,
+  yRange: true,
+  color: true,
+  onClick: false,
+}
+
+function shouldUpdate(oldProps: ScatterProps, newProps: ScatterProps) {
+  let k: keyof ScatterProps;
+  for (k in oldProps) {
+    if (oldProps[k] !== newProps[k] && REQUIRES_UPDATE[k]) {
+      return true;
+    }
+  }
+  return false;
+}
+```
