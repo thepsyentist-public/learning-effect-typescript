@@ -229,3 +229,54 @@ type CalculatorType = (a: number, b: number) => number;
 const add: CalculatorType = (a, b) => a + b;
 const sub: CalculatorType = (a, b) => a - b;
 ```
+
+## 아이템13. 타입과 인터페이스의 차이점 알기
+
+### 읽은 내용
+
+타입스크립트에서 명명된 타입을 정의하는 방법으로는 type, interface 두가지 방법이 있다.  
+```ts
+type State = {
+  name: string;
+  capital: string;
+}
+
+interface IState {
+  name: string;
+  capital: string;
+}
+```
+
+- 공통점
+    - 인덱스 시그치너를 사용할 수 있다.
+    - 제네릭을 활용할 수 있다.
+    - 인터페이스는 타입을 확장 할 수 있고, 타입은 인터페이스를 확장할 수 있다.
+    - 클래스의 implements로 활용가능하다.
+
+- 차이점
+    - 인터페이스는 유니온 타입 같은 복잡한 타입을 확장하지 못한다.
+
+- 비교
+    - 튜플을 구현할 때는 인터페이스보다는 타입이 더 편하다.
+    - 인터페이스는 병합 선언이 가능하다.
+
+```ts
+type Pair = [number, number];
+
+interface Tuple {
+  0: number;
+  1: number;
+  length: 2;
+}
+
+interface IState {
+  name: string;
+}
+
+interface IState {
+  capital: string;
+}
+```
+
+---
+
