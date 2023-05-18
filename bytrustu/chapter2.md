@@ -89,3 +89,34 @@ interface Information extends Person {
 ### 느낀점
 타입스크립트는 타입을 집합으로 생각하고, 집합의 관계를 통해 타입을 이해하는 것이 중요하다.  
 타입을 사용하는 과정에서 동적으로 변경될 수 있는 경우라면, any 보다는 unkown을 통해서 `타입캐스팅`을 이용하는것이 좋을것 같다.
+
+
+---
+
+## 아이템8. 타입공간과 값 공간의 심벌 구분하기
+
+### 읽은 내용
+
+타입스크립트의 심벌은 `타입 공간` `값 공간` 중의 한곳에 존재한다.
+
+- 타입
+    - type, interface 키워드를 사용한다.
+    - `타입선언(:)` `타입단언(as)` 다음에 사용한다.
+- 값
+    - const, let 키워드를 사용한다.
+    - =(할당) 키워드 다음에 사용한다.
+
+`class` `enum` 은 값과 타입을 모두 가능한 예약어다.
+```ts
+class Cylinder {
+  radius = 1;
+  height = 2;
+}
+
+function calcVolumne(shape: unkown) {
+  if (shape instanceof Cylinder) {
+    shapre.radius; // 에러가 발생하지 않는다. 값의 공간으로 사용된다.
+  }
+}
+```
+
