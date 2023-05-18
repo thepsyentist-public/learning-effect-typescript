@@ -120,3 +120,36 @@ function calcVolumne(shape: unkown) {
 }
 ```
 
+---
+
+## 아이템9. 타입 단언보단 타입선언 이용하기
+
+### 읽은 내용
+
+타입 단언은 강제로 그 타입을 주는 것이라서 실제 타입과 다르더라도 오류를 표시하지 않는다.  
+`타입스라이팅`이라서 해도 좋겠다.
+
+```ts
+interface Person {
+  name: string;
+}
+
+// Person에 occupation속성이 없으므로 오류가 발생한다.
+const alice: Person = {
+  name: 'Alice',
+  occupation: 'Typescript developer',
+}
+
+// 오류가 발생하지 않는다.
+const bob = {
+  name: 'Bob',
+  occupation: 'Javascript developer',
+} as Person;
+```
+
+> ### 타입 단언은 언제 사용하면 좋을까?
+> 타입 단언은 `타입 추론(Type Interface)` 이 제대로 이루어지지 않을때 사용할 수 있다.  
+> 타입스크립트는 DOM에 접근할 수 없기 때문에 컴파일 과정에서 DOM 요소의 타입을 정확히 알아내기 어렵다.  
+> 이런 경우에는 타입 단언을 사용하여 DOM 요소의 타입을 명시적으로 지정해주는 것이 필요하다.
+
+
