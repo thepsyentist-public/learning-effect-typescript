@@ -396,3 +396,39 @@ type Ved3D = {
 가능하다면 interface, Record, 매핑된 타입 같은 인덱스 시그니처 타입보다는 정확한 타입을 사용하자.
 
 ---
+
+## 아이템16. number 인덱스 시그니처보다는 Array, 튜플, ArrayLike를 사용하기
+
+### 읽은 내용
+
+배열의 경우 객체이므로 키는 숫자가 아니라 문자열이다.  
+<img src="https://github.com/thepsyentist-public/learning-effect-typescript/assets/39726717/d85484a0-46b7-43ed-afd4-646b368cd2f4" width="300" />
+
+`arr[’0’]` 와 같이 string으로 접근하게 되면 타입스크립트 오류가 발생한다.  
+그 이유는 배열의 키는 문자열이지만 인덱스 시그니처로 사용된 숫자타입은 버그를 잡기 위한 순수 타입스크립트 코드이기 때문이다.  
+타입 체크 시점에 오류를 잡을수 있어서 유용하다.  
+
+```ts
+interface Array<T> {
+  ...
+  [n: number]: T;
+}
+```
+
+배열을 순회하는 방법으로 몇가지가 있다.
+
+- 인덱스를 신경쓰지 않을 경우: for-of
+- 인덱스의 타입이 중요할 때: Array.prototype.forEach
+- 루프 중간에 멈춰야 할 때: for(;;) 루프
+
+**어떤 길이를 가지는 배열과 비슷한 형태의 튜플을 사용하고 싶다면, 타입스크립트에 있는 `ArrayLike` 타입을 사용하자.**
+```ts
+const tupleLike: ArrayLike<string> = {
+  '0': 'A',
+  '1': 'B',
+  length: 2,
+};
+```
+
+---
+
