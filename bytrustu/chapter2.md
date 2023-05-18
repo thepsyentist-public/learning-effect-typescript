@@ -280,3 +280,64 @@ interface IState {
 
 ---
 
+## 아이템14. 타입 연산과 제네릭 사용으로 반복 줄이기
+
+### 읽은 내용
+
+타입 중복은 코드 중복만큼 많은 문제를 발생시키므로 타입에도 `DRY원칙`을 적용하는 것이 좋다.
+
+> ### DRY 원칙이란?
+> `DRY(Don’t Repeat Yourself)` 원칙은 개발에서 중복 코드를 최소화하고, 코드의 재사용성을 높이는 것을 추구하는 것이다.  
+> 이를 통해 코드의 양을 줄이고, 코드의 일관성을 유지하며, 버그 발생 가능성을 낮출수 있다.
+
+### 📖 타입에 이름 붙이기
+```ts
+function distance(a: {x: number, y: number}, b: {x: number, y: number}){}
+
+type Point2D = {
+  x: number;
+  y: number;
+}
+
+function distance2(a: Point2D, b: Point2D) {}
+```
+
+### 📖 타입 확장 시 다른 인터페이스로부터 확장하기
+```ts
+interface Person {
+  firstName: string;
+  lastName: string;
+}
+
+interface PersonWithBirth extends Person {
+  birth: Date;
+}
+```
+
+### 📖 매핑 된 타입 사용하기(기존에 존재하는 큰 집합으로부터 파생되는 타입을 지정하기)
+```ts
+interface State {
+  userId: string;
+  pageTitle: string;
+  recentFiles: string[];
+}
+
+type TopNavState = {
+  [k in 'userId' | 'pageTitle']: State[k]
+}
+```
+
+### 📖 인덱싱을 통해 타입의 반복을 줄이기
+```ts
+interface SaveAction {
+  type: 'save';
+}
+
+interface LoadAction {
+  type: 'load';
+}
+
+type Action = SaveAction | LoadAction;
+type ActionType = 'save' | 'load'; // 타입이 반복 👎
+type ActionType = Action['type']; // 유니온 인덱싱을 통해 반복을 제거 👍
+```
