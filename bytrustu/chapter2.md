@@ -209,3 +209,23 @@ const r2: Room = obj; // 정상, 임시 변수를 도입하면 잉여 속성 체
 이것이 허용되는 이유는 `잉여 속성 체크`가 **할당 가능 검사와는 별도의 과정**이기 때문이다.  
 잉여 속성 체크는 엄격한 객체 리터럴 체크라고 하며, 객체 리터럴을 사용하지 않는 할당이나 타입 단언문을 사용할 때에도 적용되지 않는다.
 
+---
+
+## 아이템12. 함수 표현식에 타입 적용하기
+
+### 읽은 내용
+
+함수 표현식을 사용하면 매개변수와 반환 값을 한번에 선언할 수 있다.  
+반면에 함수 선언문을 사용하면 함수의 매개변수와 반환 값의 타입을 따로 선언해야한다.  
+**재사용성**을 고려해서 `함수 표현식`으로 작성하도록 하자.
+
+```ts
+// 함수 선언문
+function add(a: number, b: number): number { return a + b }
+function sub(a: number, b: number): number { return a - b }
+
+// 함수 표현식
+type CalculatorType = (a: number, b: number) => number;
+const add: CalculatorType = (a, b) => a + b;
+const sub: CalculatorType = (a, b) => a - b;
+```
