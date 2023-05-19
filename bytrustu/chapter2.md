@@ -1,0 +1,486 @@
+# 2장 타입스크립트의 타입 시스템
+
+
+## 아이템6. 편집기를 사용하여 타입 시스템 탐색하기
+
+### 읽은 내용
+
+타입 스크립트를 설치하면 두 가지를 실행할 수 있다.  
+- 타입스크립트 컴파일러(tsc)
+- 단독으로 실행할 수 있는 타입스크립트 서버(tsserver)
+
+타입스크립트는 컴파일러 실행 목적이지만, `언어 서비스`를 제공한다.
+> **언어서비스란?**  
+> 코드 자동완성, 검색, 명세검사가 가능하고 타입 추론을 가능해주게 한다.
+
+반환 타입을 정해주지 않아도 인자의 타입을 추론하여 반환타입을 추론해준다.  
+```ts
+const num = (a: number, b: number) => a + b;
+```
+
+라이브러리와 라이브러리 타입 선언을 탐색할 때에도 도움을 준다.  
+fetch에서 정의로 이동 옵션을 누르면 타입스크립트에 포함되어 있는 DOM타입 선언인 lib.dom.ts로 이동한다.
+```ts
+const response = fetch('https://test.com');
+```
+
+### 추가로 공유하고 싶은 내용
+리액트에서도 컴포넌트의 Props 타입을 지정할때, HTML 태그 타입을 활용가능하다.  
+```ts
+// BAD: 인덱스 시그니처 타입은 탈출구 같은 느낌으로 사용된다.
+type Props =  {
+    className?: string;
+    color?: ButtonColor;
+    [key: string]: any;
+}
+
+// GOOD: HTML 태그를 사용하면 타입을 명시적으로 활용가능하다. 언어서비스도 지원된다.
+type ButtonProps = {
+    className?: string;
+    color?: ButtonColor;
+}
+type Props = ButtonPrpos & HTMLAttributes<HTMLButtonElement>;
+
+const Button = ({ color = 'primary', ...props }: Props) => (
+    ...
+);
+```
+
+---
+
+## 아이템7. 타입이 값들의 집합이라고 생각하기
+
+### 읽은 내용  
+
+**할당 가능한 값들의 집합**을 `타입`이라고 한다.  
+그리고 이러한 집합들은 타입의 범위라고 부르기도 한다.  
+
+**가장 작은 집합**은 아무 값도 포함되지 않는 공집합으로 타입스크립트에서는 `never`이다. 값의 할당이 불가능하다.  
+반대로 **가장 큰 집합**은 `unknown`이다. 어떠한 값이든 할당할 수 있는 집합이다.
+
+<img src="https://github.com/thepsyentist-public/learning-effect-typescript/assets/39726717/a9fa8868-e422-40f4-9aa1-2c5925b20233" />
+
+
+> ### unknown과 any의 차이점은 무엇일까?
+> unkown은 어떤 값이든 할당할 수 있다. 하지만 이 값을 사용하기 위해서는 해당 값이 어떤 타입인지 미지 알아야한다.  
+> 그래서 사용할 때는 보통 타입 검사를 통해 해당 값이 안전하게 사용될 수 있는지 확인 절차를 거친다.  
+> any는 컴파일러가 타입 검사를 건너뛰고 해당 값에 대한 타입 체킹을 하지 않는다.  
+> 서로의 차이점은 `컴파일러의 타입 체크 여부`에 해당한다.
+
+타입스크립트에는 집합을 나타내는 몇가지 타입이 있다.
+- **유닛(unit) 타입**: 한 가지 값만 포함하는 타입
+- **유니온(union) 타입**: 두 개 혹은 세 개로 묶으려는 타입, 합집합, | 연산자
+- **인터섹션(intersection) 타입**: 두 타입에서 둘 다 가지는 공통 속성 타입, 교집합, & 연산자
+
+그리고 부분집합의 의미로는 **extends**를 사용할 수 있다.  
+extends는 ~에 할당가능한 이란 뜻으로 ~의 부분집합이라는 의미를 가진다.
+
+```ts
+interface Person {
+  name: string;
+}
+
+interface Information extends Person {
+  id: number;
+  password: string;
+}
+```
+
+### 느낀점
+타입스크립트는 타입을 집합으로 생각하고, 집합의 관계를 통해 타입을 이해하는 것이 중요하다.  
+타입을 사용하는 과정에서 동적으로 변경될 수 있는 경우라면, any 보다는 unkown을 통해서 `타입캐스팅`을 이용하는것이 좋을것 같다.
+
+
+---
+
+## 아이템8. 타입공간과 값 공간의 심벌 구분하기
+
+### 읽은 내용
+
+타입스크립트의 심벌은 `타입 공간` `값 공간` 중의 한곳에 존재한다.
+
+- 타입
+    - type, interface 키워드를 사용한다.
+    - `타입선언(:)` `타입단언(as)` 다음에 사용한다.
+- 값
+    - const, let 키워드를 사용한다.
+    - =(할당) 키워드 다음에 사용한다.
+
+`class` `enum` 은 값과 타입을 모두 가능한 예약어다.
+```ts
+class Cylinder {
+  radius = 1;
+  height = 2;
+}
+
+function calcVolumne(shape: unkown) {
+  if (shape instanceof Cylinder) {
+    shapre.radius; // 에러가 발생하지 않는다. 값의 공간으로 사용된다.
+  }
+}
+```
+
+---
+
+## 아이템9. 타입 단언보단 타입선언 이용하기
+
+### 읽은 내용
+
+타입 단언은 강제로 그 타입을 주는 것이라서 실제 타입과 다르더라도 오류를 표시하지 않는다.  
+`타입스라이팅`이라서 해도 좋겠다.
+
+```ts
+interface Person {
+  name: string;
+}
+
+// Person에 occupation속성이 없으므로 오류가 발생한다.
+const alice: Person = {
+  name: 'Alice',
+  occupation: 'Typescript developer',
+}
+
+// 오류가 발생하지 않는다.
+const bob = {
+  name: 'Bob',
+  occupation: 'Javascript developer',
+} as Person;
+```
+
+> ### 타입 단언은 언제 사용하면 좋을까?
+> 타입 단언은 `타입 추론(Type Interface)` 이 제대로 이루어지지 않을때 사용할 수 있다.  
+> 타입스크립트는 DOM에 접근할 수 없기 때문에 컴파일 과정에서 DOM 요소의 타입을 정확히 알아내기 어렵다.  
+> 이런 경우에는 타입 단언을 사용하여 DOM 요소의 타입을 명시적으로 지정해주는 것이 필요하다.
+
+
+---
+
+## 아이템10. 객체 래퍼 타입 피하기
+
+### 읽은 내용
+
+자바스크립트의 기본형은 number, string, null, boolean, symbol, bigint 로 불변적 성격을 가지며, 메소드를 가지고 있지 않다.  
+하지만 타입마다 래퍼타입을 가지고 있다.
+
+```js
+'string'.chatAt(2);
+// "r"
+```
+
+string에는 메서드가 없지만 자바스크립트에서는 기본형과 객체 타입을 서로 자유롭게 변환이 가능하다.  
+`기본형` → `객체형으로 변환` → `메소드 호출` → `래핑한 객체 버림` 순서로 진행하여 메서도를 사용하는 것처럼 보이게 된다.  
+
+객체형과 기본형이 서로 변환이 쉽지만 객체형은 오직 자기자신하고만 동일하다.  
+그리고 객체래퍼의 타입변환은 어떤 속성을 기본형에 할당하면 그 속성은 사라진다.
+
+타입스크립트는 기본형과 객체 래퍼타입을 별도로 모델링하므로 객체 래퍼는 필요할 때 제외하고는 지양하자.
+
+---
+
+## 아이템11. 잉여속성체크의 한계 인지하기
+
+### 읽은 내용
+
+타입이 명시 된 변수에 리터럴을 할당할 때에는 구조적 타이핑이 무력화 됩니다.  
+이와 같은 동작을 잉여 속성 체크라고 합니다.  
+
+```ts
+interface Room {
+  numDorrs: number;
+  ceilingHeightFt: number;
+}
+
+const r: Room = {
+  numDorrs: 1,
+  ceilingHeightFt: 10,
+  elephant: 'present' // 오류 발생
+}
+
+const obj = {
+  numDorrs: 1,
+  ceilingHeightFt: 10,
+  elephant: 'present',
+};
+
+const r2: Room = obj; // 정상, 임시 변수를 도입하면 잉여 속성 체크가 동작하지 않는다.
+```
+
+임의로 변수를 이용해서 할당을 하면 잉여 속성 체크가 작동하지 않는다.  
+이것이 허용되는 이유는 `잉여 속성 체크`가 **할당 가능 검사와는 별도의 과정**이기 때문이다.  
+잉여 속성 체크는 엄격한 객체 리터럴 체크라고 하며, 객체 리터럴을 사용하지 않는 할당이나 타입 단언문을 사용할 때에도 적용되지 않는다.
+
+---
+
+## 아이템12. 함수 표현식에 타입 적용하기
+
+### 읽은 내용
+
+함수 표현식을 사용하면 매개변수와 반환 값을 한번에 선언할 수 있다.  
+반면에 함수 선언문을 사용하면 함수의 매개변수와 반환 값의 타입을 따로 선언해야한다.  
+**재사용성**을 고려해서 `함수 표현식`으로 작성하도록 하자.
+
+```ts
+// 함수 선언문
+function add(a: number, b: number): number { return a + b }
+function sub(a: number, b: number): number { return a - b }
+
+// 함수 표현식
+type CalculatorType = (a: number, b: number) => number;
+const add: CalculatorType = (a, b) => a + b;
+const sub: CalculatorType = (a, b) => a - b;
+```
+
+## 아이템13. 타입과 인터페이스의 차이점 알기
+
+### 읽은 내용
+
+타입스크립트에서 명명된 타입을 정의하는 방법으로는 type, interface 두가지 방법이 있다.  
+```ts
+type State = {
+  name: string;
+  capital: string;
+}
+
+interface IState {
+  name: string;
+  capital: string;
+}
+```
+
+- 공통점
+    - 인덱스 시그치너를 사용할 수 있다.
+    - 제네릭을 활용할 수 있다.
+    - 인터페이스는 타입을 확장 할 수 있고, 타입은 인터페이스를 확장할 수 있다.
+    - 클래스의 implements로 활용가능하다.
+
+- 차이점
+    - 인터페이스는 유니온 타입 같은 복잡한 타입을 확장하지 못한다.
+
+- 비교
+    - 튜플을 구현할 때는 인터페이스보다는 타입이 더 편하다.
+    - 인터페이스는 병합 선언이 가능하다.
+
+```ts
+type Pair = [number, number];
+
+interface Tuple {
+  0: number;
+  1: number;
+  length: 2;
+}
+
+interface IState {
+  name: string;
+}
+
+interface IState {
+  capital: string;
+}
+```
+
+---
+
+## 아이템14. 타입 연산과 제네릭 사용으로 반복 줄이기
+
+### 읽은 내용
+
+타입 중복은 코드 중복만큼 많은 문제를 발생시키므로 타입에도 `DRY원칙`을 적용하는 것이 좋다.
+
+> ### DRY 원칙이란?
+> `DRY(Don’t Repeat Yourself)` 원칙은 개발에서 중복 코드를 최소화하고, 코드의 재사용성을 높이는 것을 추구하는 것이다.  
+> 이를 통해 코드의 양을 줄이고, 코드의 일관성을 유지하며, 버그 발생 가능성을 낮출수 있다.
+
+### 📖 타입에 이름 붙이기
+```ts
+function distance(a: {x: number, y: number}, b: {x: number, y: number}){}
+
+type Point2D = {
+  x: number;
+  y: number;
+}
+
+function distance2(a: Point2D, b: Point2D) {}
+```
+
+### 📖 타입 확장 시 다른 인터페이스로부터 확장하기
+```ts
+interface Person {
+  firstName: string;
+  lastName: string;
+}
+
+interface PersonWithBirth extends Person {
+  birth: Date;
+}
+```
+
+### 📖 매핑 된 타입 사용하기(기존에 존재하는 큰 집합으로부터 파생되는 타입을 지정하기)
+```ts
+interface State {
+  userId: string;
+  pageTitle: string;
+  recentFiles: string[];
+}
+
+type TopNavState = {
+  [k in 'userId' | 'pageTitle']: State[k]
+}
+```
+
+### 📖 인덱싱을 통해 타입의 반복을 줄이기
+```ts
+interface SaveAction {
+  type: 'save';
+}
+
+interface LoadAction {
+  type: 'load';
+}
+
+type Action = SaveAction | LoadAction;
+type ActionType = 'save' | 'load'; // 타입이 반복 👎
+type ActionType = Action['type']; // 유니온 인덱싱을 통해 반복을 제거 👍
+```
+
+--- 
+
+## 아이템15. 동적 데이터에 인덱스 시그니처 사용하기
+
+### 읽은 내용
+
+타입스크립트에서는 타입에 인덱스 시그니처를 명시하여 유연하게 매핑을 표현할 수 있다.
+```ts
+type Rocket = { [property: string]: string; }
+const rocket: Rocket = {
+  name: 'Falcon 9',
+  variant: 'v1.0',
+  thrust: '4,940 kN',
+}
+```
+
+> ### 인덱스 시그니처로만 타입을 구선하게 되면 몇가지 `단점`이 존재한다.
+> - 잘못된 키를 포함해서 모든 키를 허용한다. nane같은 오탈자로 작성해도 유효한 타입이 된다.
+> - 특정 키가 필요하지 않는다. {}도 유효한 Rocket 타입이다.
+> - 키마다 다른 타입을 가질 수 없다.
+> - 자동 완성 기능이 동작하지 않는다.
+>
+> 위 같은 단점은 인터페이스를 설정함으로써 해결할 수 있다.  
+> 인덱스 시그니처는 동적 데이터(런타임때까지 객체의 속성을 알 수 없는)를 표현할 때 사용한다.  
+> 어떤 타입에 가능한 필드가 제한되어 있는 경우라면 인덱스 시그니처를 모델링하면 안된다.  
+> string 타입을 인덱스 시그니처를 활용 할 경우에는 다음과 같이 사용해보자.    
+
+### 📖 Record 활용하기  
+Record는 키 타입에 유연성을 제공하는 제네릭 타입이다. string의 부분 집합으로 사용할 수 있다.
+```ts
+type Ved3D = Recrod<'x' | 'y' | 'z', number>;
+
+type Ved3D = {
+  x: number;
+  y: number;
+  z: number;
+}
+```
+
+### 📖 매핑된 타입 활용하기
+```ts
+type Ved3D = { [k in 'x' | 'y' | 'z']: number; }
+
+type Ved3D = {
+  x: number;
+  y: number;
+  z: number;
+}
+```
+
+### 느낀점
+가능하다면 interface, Record, 매핑된 타입 같은 인덱스 시그니처 타입보다는 정확한 타입을 사용하자.
+
+---
+
+## 아이템16. number 인덱스 시그니처보다는 Array, 튜플, ArrayLike를 사용하기
+
+### 읽은 내용
+
+배열의 경우 객체이므로 키는 숫자가 아니라 문자열이다.  
+<img src="https://github.com/thepsyentist-public/learning-effect-typescript/assets/39726717/d85484a0-46b7-43ed-afd4-646b368cd2f4" width="300" />
+
+`arr[’0’]` 와 같이 string으로 접근하게 되면 타입스크립트 오류가 발생한다.  
+그 이유는 배열의 키는 문자열이지만 인덱스 시그니처로 사용된 숫자타입은 버그를 잡기 위한 순수 타입스크립트 코드이기 때문이다.  
+타입 체크 시점에 오류를 잡을수 있어서 유용하다.  
+
+```ts
+interface Array<T> {
+  ...
+  [n: number]: T;
+}
+```
+
+배열을 순회하는 방법으로 몇가지가 있다.
+
+- 인덱스를 신경쓰지 않을 경우: for-of
+- 인덱스의 타입이 중요할 때: Array.prototype.forEach
+- 루프 중간에 멈춰야 할 때: for(;;) 루프
+
+**어떤 길이를 가지는 배열과 비슷한 형태의 튜플을 사용하고 싶다면, 타입스크립트에 있는 `ArrayLike` 타입을 사용하자.**
+```ts
+const tupleLike: ArrayLike<string> = {
+  '0': 'A',
+  '1': 'B',
+  length: 2,
+};
+```
+
+---
+
+## 아이템17. 변경 관련된 오류 방지를 위해 readonly 사용하기
+
+### 읽은 내용
+
+> ### readonly 란?
+> 값의 속성을 읽기 전용으로 설정해주는 타입시스템 기능이다.  
+함수가 매개변수로 받는 값을 변경없이 그대로 사용해야할때 적합하고, 외부 클래스나 함수에서 호출이 가능하지만 값의 변경이 불가능하므로 내부에서 미리 값을 초기화 해줘야한다.
+
+타입스크립트에서는 readonly를 사용하지 않더라도, JS는 암묵적으로 매개변수를 변경하지 않는것을 권장한다.  
+하지만 이러한 방법은 항상 명확하지 않기 때문에 readonly를 명시적으로 선언하는 것이 컴파일러와 코드를 읽는 사람에게 좋은 방법이다.  
+
+---
+
+## 아이템18. 매핑된 타입을 사용하여 값을 동기화하기
+
+### 읽은 내용
+
+매핑된 타입은 한 객체가 또 다른 객체와 정확히 같은 속성을 가지게 할 때 이상적이다.  
+매핑된 타입을 사용해 타입스크립트가 코드에 제약을 강제하도록 한다.  
+인터페이스에 새로운 속성을 추가할 때, 선택을 강제 하도록 매핑된 타입을 고려해야 한다.  
+
+```ts
+interface ScatterProps {
+  xs: number[];
+  ys: number[];
+
+  xRange: [number, number];
+  yRange: [number, number];
+  color: string;
+
+  onClick: (x: number, y: number, index: number) => void;
+}
+
+const REQUIRES_UPDATE: { [k in keyof ScatterProps]: boolean } = {
+  xs: true,
+  ys: true,
+  xRange: true,
+  yRange: true,
+  color: true,
+  onClick: false,
+}
+
+function shouldUpdate(oldProps: ScatterProps, newProps: ScatterProps) {
+  let k: keyof ScatterProps;
+  for (k in oldProps) {
+    if (oldProps[k] !== newProps[k] && REQUIRES_UPDATE[k]) {
+      return true;
+    }
+  }
+  return false;
+}
+```
