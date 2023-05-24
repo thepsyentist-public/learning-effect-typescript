@@ -133,3 +133,57 @@ const v3 = {
 ```
 
 ---
+
+## 아이템22. 타입 좁히기
+
+### 읽은 내용
+
+> ### 타입 좁히기 란?
+> 타입스크립트가 넓은 타입으로부터 좁은 타입으로 진행하는 과정을 말한다.  
+> 즉, 변수나 식별자의 타입을 보다 구체적으로 좁히는 것을 의미한다.
+
+> ### 타입 가드 란?
+> 타입스크립트에서 변수의 타입을 좁히는 역할을 하는 것을 말한다.  
+> 조건문(if, switch), typeof, instanceof 등으로 타입을 좁힐 수 있다.  
+
+### 📖 instanceof 속성 체크 Array.isArray 같은 내장 함수로 타입을 좁힐 수 있다.
+
+```ts
+const el = document.getElementById('foo'); // 타입은 HTMLElement | null
+if (el) {
+  // 타입은 HTMLElement
+  el.innerHTML = '1';
+} else {
+  // 타입은 null
+  alert('no element');
+}
+
+if (!el) {
+  // 타입은 null
+  throw new Error('no element');
+}
+// 타입은 HTMLElement
+el.innerHTML = '1'; 
+```
+
+### 📖 명시적 태그를 붙이는 방법으로 사용자 정의 타입 가드를 이용할 수 있다.
+
+> ### 사용자 정의 타입 가드 란?
+> 개발자가 직접 정의한 함수를 사용하여, 변수의 타입을 좁히는 것을 말한다.
+
+```ts
+function isInputElement(el: HTMLElement): el is HTMLInputElement {
+  return 'value' in el;
+}
+
+function getElementByContent(el: HTMLElement) {
+  if (isInputElement(el)) {
+    // 타입은 HTMLInputElement
+    return el.value;
+  }
+  // 타입은 HTMLElement
+  return el.textContent;
+}
+```
+
+---
