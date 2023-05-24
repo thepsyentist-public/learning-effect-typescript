@@ -187,3 +187,25 @@ function getElementByContent(el: HTMLElement) {
 ```
 
 ---
+
+## 아이템23. 한꺼번에 객체 생성하기
+
+### 읽은 내용
+
+타입스크립트의 타입은 일반적으로 변경되지 않는다.  
+객체를 생성할 때는 속성을 하나씩 추가하기보다 여러 속성을 포함해서 한꺼번에 생성해야 타입 추론에 유리하다.  
+안전한 타입으로 속성을 추가하려면 객체 전개 연사자를 사용한다.  
+객체에 조건부로 속성을 추가하는 방법을 사용하도록 하자.  
+
+```ts
+declare let hasMiddle: boolean;
+
+interface IPresident {
+  middle?: string;
+  first: string;
+  last: string;
+}
+
+const firstLast = { first: 'Harry', last: 'Truman' };
+const president: IPresident = { ...firstLast, ...(hasMiddle ? { middle: 'S' } : {}) };
+```
