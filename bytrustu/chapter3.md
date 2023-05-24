@@ -209,3 +209,35 @@ interface IPresident {
 const firstLast = { first: 'Harry', last: 'Truman' };
 const president: IPresident = { ...firstLast, ...(hasMiddle ? { middle: 'S' } : {}) };
 ```
+
+## 아이템24. 일관성 있는 별칭 사용하기
+
+### 읽은 내용
+
+타입스크립트에서 식별자를 일관성 없이 사용하는 것은 지양해야 한다.  
+그 이유는 타입 좁히기와 관련이 있기 때문이다.  
+
+box라는 별칭을 만들었으면, 타입을 좁히는 과정에서 box를 활용하여야 내부 조건을 명확히 할 수 있다.  
+
+```ts
+interface Coordinate {
+  x: number;
+  y: number;
+}
+
+interface BoundingBox {
+  x: [number, number];
+  y: [number, number];
+}
+
+interface Polygon {
+  exterior: Coordinate[];
+  holes: Coordinate[][];
+  bbox?: BoundingBox;
+}
+
+function isPositionInPolygon(polygon: Polygon, pt: Coordinate) {
+    const box = polygon.bbox;
+    ...
+}
+```
