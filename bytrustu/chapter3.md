@@ -299,3 +299,18 @@ num(loc2); // 오류, 배열 길이를 알 수 없다. number[] 로 추론된다
 ```
 
 ---
+
+## 아이템27. 함수형 기법과 라이브러리로 타입흐름 유지하기
+
+### 읽은 내용
+
+타입 흐름을 개선하고, 가독성을 높이고, 명시적인 타입 구문의 필요성을 줄이기 위해 직접 구현하기 보다는 내장된 함수형 기법과 lodash같은 유틸리티 라이브러리를 활용하는 것이 좋다.
+
+```ts
+const bestPaid = _(allPlayer)
+  .groupBy(player => player.team)
+  .mapValues(players => _.maxBy(players, p => p.salary)!)
+  .values()
+  .sortBy(p => -p.salary)
+  .value() // 타입은 BaseketballPlayer[]
+```
