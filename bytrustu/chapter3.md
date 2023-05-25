@@ -241,3 +241,17 @@ function isPositionInPolygon(polygon: Polygon, pt: Coordinate) {
     ...
 }
 ```
+
+---
+
+## 아이템25. 비동기 코드에는 콜백 대신 async 함수 사용하기
+
+> 콜백보다 Promise, async/await을 사용하도록 한다.  
+
+- 콜백보다는 **Promise**가 `코드 가독성`과 `타입 추론이` 쉽고, `타입스크립트의 모든 타입 추론이 제대로 동작`한다.  
+
+- Promise보다는 **async/await**가 `간결하고 직관적`이며, `항상 Promise를 반환하도록 강제`하게 된다.  
+
+콜백, Promise를 사용하면 반동기 코드를 작성할 수도 있는데, async를 사용하면 `항상 비동기 코드`가 작성된다.
+
+---
